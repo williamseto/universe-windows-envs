@@ -39,13 +39,13 @@ def get_saved_games_profile_folders():
 def download_paths_xml():
     gtav_dir = os.environ['GTAV_DIR']
     logger.info('Downloading paths.xml file to %s - file is 150MB so this may take a while', gtav_dir)
-    gym_windows.download_file('https://www.dropbox.com/s/6qc900o3a574yxc/paths.xml?dl=1', os.path.join(gtav_dir, 'paths.xml'))
+    gym_windows.download_file('https://cmu.box.com/shared/static/q2cwyr5bumskr5f15v3hqq74otl0jfui.xml', os.path.join(gtav_dir, 'paths.xml'))
 
 
 def setup():
     download_paths_xml()
     replace_saved_games()
-    enforce_version(GTAV_DIR)
+    #enforce_version(GTAV_DIR)
     copy_scripthook()
 
 
