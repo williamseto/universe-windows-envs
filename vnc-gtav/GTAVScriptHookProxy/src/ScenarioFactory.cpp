@@ -11,31 +11,34 @@
 
 using namespace Nvidia;
 
-Scenario Nvidia::ScenarioFactory::createScenario(const boost::property_tree::basic_ptree<std::string, std::string> & item)
+Scenario* Nvidia::ScenarioFactory::createScenario(const boost::property_tree::basic_ptree<std::string, std::string> & item)
 {
-	Scenario ret; 
+	Scenario* ret = new Scenario();
 
-	ret.m_name = item.get("name", "Unnamed");
+	ret->m_name = item.get("name", "Unnamed");
+	ret->m_status = Nvidia::Scenario::Status::NotStarted;
 
-	ret.m_lengthInMilliseconds = item.get("length", 20000);
+	BOOST_LOG_TRIVIAL(info) << "SF: new scenario: " << ret->m_name;
 
-	ret.m_rewardFunction = loadRewardFunction(item.get("rewardFunction", ""));
+	ret->m_lengthInMilliseconds = item.get("length", 20000);
+
+	ret->m_rewardFunction = loadRewardFunction(item.get("rewardFunction", ""));
 
 	auto && cameraPosition = item.get_child("cameraPosition");
 
-	ret.m_cameraPosition.x = cameraPosition.get("x", 0.0f);
-	ret.m_cameraPosition.y = cameraPosition.get("y", 0.0f);
-	ret.m_cameraPosition.z = cameraPosition.get("z", 0.0f);
+	ret->m_cameraPosition.x = cameraPosition.get("x", 0.0f);
+	ret->m_cameraPosition.y = cameraPosition.get("y", 0.0f);
+	ret->m_cameraPosition.z = cameraPosition.get("z", 0.0f);
 
-	ret.m_removeOtherEntities = item.get("removeOtherEntities", true);
+	ret->m_removeOtherEntities = item.get("removeOtherEntities", true);
 
-	ret.m_timeScale = item.get("timeScale", 1.0f);
+	ret->m_timeScale = item.get("timeScale", 1.0f);
 
-	ret.m_hour = item.get("hour", 9);
-	ret.m_minute = item.get("minute", 0);
-	ret.m_second = item.get("second", 0);
+	ret->m_hour = item.get("hour", 9);
+	ret->m_minute = item.get("minute", 0);
+	ret->m_second = item.get("second", 0);
 
-	ret.m_weather = item.get("weather", "");
+	ret->m_weather = item.get("weather", "");
 
 	for (auto & actor : item.get_child("actors"))
 	{
@@ -48,27 +51,29 @@ Scenario Nvidia::ScenarioFactory::createScenario(const boost::property_tree::bas
 		{
 			createdActor = createPlayerActor(data);
 
-			ret.m_playerActor = (PlayerActor *)createdActor;
+			ret->m_playerActor = (PlayerActor *)createdActor;
 
-			ret.m_actors.push_back(createdActor);
+			ret->m_actors.emplace_back(createdActor);
+			BOOST_LOG_TRIVIAL(info) << "SF: created player actor!";
 		}
 		else if (type == "pedestrian")
 		{
 			createdActor = createPedestrianActor(data);
 
-			ret.m_actors.push_back(createdActor);
+			ret->m_actors.emplace_back(createdActor);
 		}
 		else if (type == "vehicle")
 		{
 			createdActor = createVehicleActor(data);
 
-			ret.m_actors.push_back(createdActor);
+			ret->m_actors.emplace_back(createdActor);
+			BOOST_LOG_TRIVIAL(info) << "SF: created vehicle actor!" << createdActor;
 		}
 		else if (type == "light")
 		{
 			createdActor = createLightActor(data);
 
-			ret.m_actors.push_back(createdActor);
+			ret->m_actors.emplace_back(createdActor);
 		}
 		else
 			throw std::exception("Unknown actor type sent into method");
@@ -81,9 +86,9 @@ Scenario Nvidia::ScenarioFactory::createScenario(const boost::property_tree::bas
 			}
 		}
 		
-			
+		BOOST_LOG_TRIVIAL(info) << "SF: created scenario!";
 	}
-
+	BOOST_LOG_TRIVIAL(info) << "SF: done creating scenarios!";
 	return ret;
 }
 

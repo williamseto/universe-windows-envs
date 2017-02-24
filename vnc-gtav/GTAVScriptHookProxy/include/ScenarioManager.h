@@ -10,7 +10,7 @@ namespace Nvidia
 	class ScenarioManager
 	{
 	public:
-		using ScenarioCollection = std::vector<Scenario>;
+		using ScenarioCollection = std::vector<Scenario*>;
 		using ScenarioIterator = ScenarioCollection::iterator;
 
 		ScenarioManager();

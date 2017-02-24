@@ -8,7 +8,7 @@ namespace Nvidia
 	class ScenarioFactory
 	{
 	public:
-		static Scenario createScenario(const boost::property_tree::basic_ptree<std::string, std::string> & item);
+		static Scenario* createScenario(const boost::property_tree::basic_ptree<std::string, std::string> & item);
 
 	private:
 
