@@ -12,6 +12,7 @@ const std::string kKeyDown = " down}";
 const std::string kKeyUp = " up}";
 
 void load_saved_game();
+void quick_reset();
 void try_loading_story_mode();
 void wait_for_script_hook_to_load(SharedAgentMemory * shared);
 

@@ -119,3 +119,10 @@ void load_saved_game()
 	// Go to game -> load game and select the most recently saved game
 	send_keys({"RIGHT", "RIGHT", "RIGHT", "RIGHT", "ENTER", "DOWN", "DOWN", "ENTER", "ENTER", "ENTER"});
 }
+
+void quick_reset()
+{
+	// hotkey implemented on scripthook side to restart episode
+	send_key("F9");
+	AU3_Sleep(1500);
+}

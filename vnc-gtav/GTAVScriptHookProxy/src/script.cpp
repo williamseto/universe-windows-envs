@@ -17,7 +17,7 @@
 
 using namespace OpenAIGym;
 
-Nvidia::ScenarioManager Script::s_scenario_manager_;
+Nvidia::ScenarioManager s_scenarioManager;
 
 // TODO: Move this into an object
 Cam deep_drive_cam = 0;
@@ -520,6 +520,7 @@ void Script::reset_agent(SharedAgentMemory* shared)
 	(*shared).forward_jariness = 0;
 	(*shared).lateral_jariness = 0;
 	(*shared).vertical_jariness = 0;
+
 }
 
 void Script::main()
@@ -530,14 +531,73 @@ void Script::main()
 	SharedAgentMemory* shared = ScriptHookSharedMemory::shared();
 	reset_agent(shared);
 
+	Player player;
+	Ped player_ped;
+	int vehicle = -1;
+	int iter = 0;
+
 #ifdef USE_NVIDIA_SCENARIOS
-	// Use NVIDIA's JSON scenario and reward definition language
-	s_scenarioManager.load("scenario.json");
-	s_scenarioManager.run(ScriptHookSharedMemory::shared()->scenarioName);
+
+	// wait until story mode is loaded
 	while (true)
 	{
-		s_scenarioManager.onGameLoop();
-		WAIT(1);
+		refresh(player, player_ped, vehicle, shared);
+
+		auto vehiclePos = ENTITY::GET_ENTITY_COORDS(vehicle, FALSE);
+		//BOOST_LOG_TRIVIAL(info) << "sciprt main: vehicle pos: " << vehiclePos.x << " " << vehiclePos.y << " " << vehiclePos.z;
+
+		if ((vehiclePos.x != 0) && (vehiclePos.y != 0) && (vehiclePos.z != 0))
+		{
+			break;
+		}
+		WAIT(100);
+	}
+
+	// Use NVIDIA's JSON scenario and reward definition language
+	s_scenarioManager.load("scenario.json");
+	BOOST_LOG_TRIVIAL(info) << "sciprt main: done loading scenario";
+	shared->scenario_name = "intersection";
+	s_scenarioManager.run(ScriptHookSharedMemory::shared()->scenario_name);
+
+	while (true)
+	{
+
+		if (iter % 100 == 0) // Do this every second as the game seems to unset certain mod settings every once in a while
+		{
+			refresh(player, player_ped, vehicle, shared);
+		}
+
+
+		// receive reset signal from universe client?
+		if (shared->should_reset_agent || isKeyJustUp(VK_F11))
+		{
+			BOOST_LOG_TRIVIAL(info) << "Resetting agent";
+			//s_scenarioManager.reset();
+			reset_agent(shared);
+			shared->should_reset_agent = false;
+		}
+
+		// use a hotkey to reset the scenario/restart episode
+		// original way of restarting is to load game again so it would send keys to reload game
+		// considered using 'shared->should_reset_agent', but GTAEnv is calling reset every iteration
+		if (isKeyJustUp(VK_F9))
+		{
+			s_scenarioManager.reset();
+		}
+		else
+		{
+			// run scenario specific logic
+			s_scenarioManager.onGameLoop();
+		}
+
+
+		// send game info to environment interface
+		set_reward_and_info_shared_mem(shared, player, vehicle);
+
+
+		WAIT(10);
+		//update_status_text();
+		iter++;
 	}
 #else
 	deep_drive();

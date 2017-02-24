@@ -157,6 +157,8 @@ void GTAVEnv::reset_game()
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
 		BOOST_LOG_SEV(lg_, ls::warning) << "fake reset done";
+
+		quick_reset();
 	}
 	else
 	{
