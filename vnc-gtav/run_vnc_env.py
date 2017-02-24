@@ -202,7 +202,7 @@ def main():
     elif args.verbosity >= 1:
         logger.setLevel(logging.DEBUG)
 
-    enforce_version(GTAV_DIR)
+    #enforce_version(GTAV_DIR)
 
     runner = GTAVEnvRunner(args.env_id, args.instance_id, args.skip_loading_saved_game, args.pause_for_attach,
                            args.rewards_per_second, args.scenario)
