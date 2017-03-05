@@ -3,6 +3,7 @@
 #include "natives.h"
 #include "Keyboard.h"
 
+
 void Nvidia::PlayerActor::setupActor(DWORD currentTick)
 {
 	auto player = PLAYER::PLAYER_PED_ID();
@@ -16,8 +17,8 @@ void Nvidia::PlayerActor::setupActor(DWORD currentTick)
 	{
 		m_veh = createRandomVehicle(m_type, m_position.x, m_position.y, m_position.z, m_heading);
 	}
-	
 	PED::SET_PED_INTO_VEHICLE(player, m_veh, -1);
+	VEHICLE::SET_VEHICLE_ENGINE_ON(m_veh, true, true, false);
 
 	m_ped = player;
 

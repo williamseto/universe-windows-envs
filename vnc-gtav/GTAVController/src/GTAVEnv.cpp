@@ -136,6 +136,26 @@ void GTAVEnv::sendReward_()
 	info["time_since_drove_against_traffic"] = shared_->time_since_drove_against_traffic;
 	info["distance_from_destination"] = shared_->distance_from_destination;
 
+	//add target info
+	//BOOST_LOG_SEV(lg_, ls::warning) << "scenario: " << shared_->scenario_name;
+	BOOST_LOG_SEV(lg_, ls::warning) << "time against traffic: " << shared_->time_since_drove_against_traffic;
+	for (int n = 0; n < shared_->num_targets; n++)
+	{
+		Json::Value target_info;
+
+		target_info["x"] = shared_->targets[n].x;
+		target_info["y"] = shared_->targets[n].y;
+		target_info["z"] = shared_->targets[n].z;
+		target_info["vel_x"] = shared_->targets[n].vel_x;
+		target_info["vel_y"] = shared_->targets[n].vel_y;
+		target_info["vel_z"] = shared_->targets[n].vel_z;
+		target_info["heading"] = shared_->targets[n].heading;
+
+		info["targets"].append(target_info);
+
+		//BOOST_LOG_SEV(lg_, ls::warning) << shared_->targets[n].x;
+	}
+
 	double reward;
 	bool done;
 	reward_calculator_.get_reward(shared_.get(), reward, done, info);
@@ -153,12 +173,12 @@ void GTAVEnv::reset_game()
 	{
 		BOOST_LOG_SEV(lg_, ls::warning) << "skip_loading_saved_game is set, skipping reload - you should turn this off if you are not debugging, simulating reset delay...";
 
+		quick_reset();
+
 		// Zero reset time causes a race condition in universe client where `completed_episode_id` differs from `_current_episode_id` too quickly
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
 		BOOST_LOG_SEV(lg_, ls::warning) << "fake reset done";
-
-		quick_reset();
 	}
 	else
 	{

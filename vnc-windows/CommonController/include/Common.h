@@ -27,9 +27,9 @@ namespace ls = boost::log::trivial;
 #define PRINTING // take away if you don't want to print anything
 
 // _DEBUG is set by Visual Studio in debug mode. PROJ_DEBUG is our own flag that allows us to control debug statements separately from Visual Studio.
-#ifdef _DEBUG
-    #define PROJ_DEBUG
-#endif
+//#ifdef _DEBUG
+//    #define PROJ_DEBUG
+//#endif
 
 #define DEFAULT_BUFLEN 65536
 #define MAX_PACKET_SIZE 10000000

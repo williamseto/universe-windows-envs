@@ -14,6 +14,12 @@
 #include <thread>
 #include <random>
 #include "keyboard.h"
+#include "nodes.h"
+#include <iostream>
+#include <fstream>
+#include <math.h>
+
+# define M_PI           3.14159265358979323846
 
 using namespace OpenAIGym;
 
@@ -37,6 +43,8 @@ std::chrono::time_point<std::chrono::system_clock> last_speed_measurement_time;
 std::chrono::time_point<std::chrono::system_clock> last_reset_time;
 Vector3 jariness = { 0, 0, 0 };
 int last_time_since_drove_against_traffic = 0;
+
+std::unordered_map<int, tNode> loaded_nodes;
 
 
 
@@ -162,6 +170,31 @@ inline double get_random_double(double start, double end)
 	std::uniform_real_distribution<double> uni(start, end); // guaranteed unbiased
 	auto random_double = uni(random_generator);
 	return random_double;
+}
+// Returns 1 if the lines intersect, otherwise 0. In addition, if the lines 
+// intersect the intersection point may be stored in the floats i_x and i_y.
+inline int get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y,
+	float p2_x, float p2_y, float p3_x, float p3_y, float *i_x, float *i_y)
+{
+	float s1_x, s1_y, s2_x, s2_y;
+	s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
+	s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
+
+	float s, t;
+	s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+	t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
+
+	if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+	{
+		// Collision detected
+		if (i_x != NULL)
+			*i_x = p0_x + (t * s1_x);
+		if (i_y != NULL)
+			*i_y = p0_y + (t * s1_y);
+		return 1;
+	}
+
+	return 0; // No collision
 }
 
 void Script::perform_temp_vehicle_action(Ped player_ped, int vehicle, SharedAgentMemory* shared)
@@ -289,7 +322,10 @@ void Script::get_time_since_drove_against_traffic(int player, int& time_since_dr
 	std::chrono::duration<double> time_since_reset = current_time - last_reset_time;
 	add_debug_status_text("last reset time: " + std::to_string(time_since_reset.count()));
 
-	if (time_since_drove_against_traffic > (time_since_reset.count() + 10) * 1000)
+	// make sure that we don't reset this value too fast in case we're in the middle of resetting
+	// game returns time in milliseconds
+	//if (time_since_drove_against_traffic > (time_since_reset.count() + 10) * 1000)
+	if (time_since_drove_against_traffic > (time_since_reset.count() + 1) * 1000)
 	{
 		// time since drove against traffic has not changed since reset
 		time_since_drove_against_traffic = 0;
@@ -404,6 +440,207 @@ void Script::set_reward_and_info_shared_mem(SharedAgentMemory* shared, int playe
 	shared->forward_vector                   = forward_vector;
 	shared->distance_from_destination        = distance_from_destination;
 	shared->time_since_drove_against_traffic = time_since_drove_against_traffic;
+
+}
+
+inline void draw_intersection(Vector3 playerCoord, Vector3 targetCoord)
+{
+	targetCoord.x = 1718; targetCoord.y = 3645; targetCoord.z = 35.06;
+	playerCoord.x = 1805.271; playerCoord.y = 3656.37; playerCoord.z = 33.88629;
+
+	tNode node;
+	tLink link;
+
+	// get some number of nodes. nodes are basically locations denoting somewhere on a road
+
+
+	tLinkDir playerLinkDir;
+	tLinkDir targetLinkDir;
+	for (int i = 1; i <= 6; i++) {
+		int nodeID = PATHFIND::GET_NTH_CLOSEST_VEHICLE_NODE_ID(playerCoord.x, playerCoord.y, playerCoord.z, i, 0, 300, 300);
+		node = loaded_nodes[nodeID];
+
+
+		bool found = false;
+		//link points are perpendicular to direction of road
+		//to get the actual lanes, we will need to organize them by direction
+		for (int j = 0; j < node.links.size(); j++) {
+			link = node.links.at(j);
+
+			//if (link.attr.shortcut || link.attr.width == -1) continue;
+
+			// checking linepoint size condition since first point is usually the middle of the "link" (on the road)
+			// the next two points are on opposite sides of the road
+			if (link.attr.shortcut || link.attr.width == -1 || link.linePoints.size() != 3) continue;
+
+			//BOOST_LOG_TRIVIAL(info) << "link coord: " << link.coord.x << ", " << link.coord.y << ", " << link.coord.z << " link direction: " << link.direction.x << ", " << link.direction.y << ", " << link.direction.z;
+
+
+			playerLinkDir.coord1 = link.linePoints.at(1).coord;
+			playerLinkDir.direction = link.direction;
+			playerLinkDir.coord2 = link.linePoints.at(2).coord;
+			found = true;
+
+			GRAPHICS::DRAW_LINE(link.coord.x, link.coord.y, link.coord.z, link.coord.x, link.coord.y, link.coord.z + 3, 255, 0, 0, 255);
+
+			//if (bunchofpoints.size() > 0)
+			//{
+			//	float bestDist = 99999;
+			//	Vector3 bestPoint;
+			//	double bestAngle;
+			//	int bi = -1;
+			//	for (int i = 0; i < bunchofpoints.size(); i++)
+			//	{
+			//		float diff_x = node.coord.x - bunchofpoints[i].x;
+			//		float diff_y = node.coord.y - bunchofpoints[i].y;
+
+			//		// only consider points which are about the same direction
+			//		double unscaled_dotp = link.direction.x*diff_x + link.direction.y*diff_y;
+			//		double tmpAngle = acos(unscaled_dotp / (sqrt(pow(diff_x, 2) + pow(diff_y, 2))));
+
+			//		// 10 degree tolerance
+			//		if (abs(tmpAngle) < (40 * M_PI / 180))
+			//		{
+			//			float currDist = SYSTEM::VDIST(bunchofpoints[i].x, bunchofpoints[i].y, 0, node.coord.x, node.coord.y, 0);
+			//			if (currDist < bestDist)
+			//			{
+			//				bestDist = currDist;
+			//				bestPoint = bunchofpoints[i];
+			//				bestAngle = tmpAngle;
+			//				bi = i;
+			//			}
+			//		}
+			//	}
+			//	//GRAPHICS::DRAW_LINE(node.coord.x, node.coord.y, node.coord.z + 1, bestPoint.x, bestPoint.y, bestPoint.z + 1, 255, 0, 0, 255);
+
+			//	if (bi != -1)
+			//	{
+			//		GRAPHICS::DRAW_LINE(link.linePoints.at(1).coord.x, link.linePoints.at(1).coord.y, link.linePoints.at(1).coord.z + 1, bunchofpoints1[bi].x, bunchofpoints1[bi].y, bunchofpoints1[bi].z + 1, 255, 0, 0, 255);
+			//		GRAPHICS::DRAW_LINE(link.linePoints.at(2).coord.x, link.linePoints.at(2).coord.y, link.linePoints.at(2).coord.z + 1, bunchofpoints2[bi].x, bunchofpoints2[bi].y, bunchofpoints2[bi].z + 1, 255, 0, 0, 255);
+			//	}
+			//	//BOOST_LOG_TRIVIAL(info) << "best angle: " << bestAngle;
+			//}
+
+			//// should we break or not? empirically it looks like multiple links are usually almost the same
+			break;
+		}
+		if (found)
+		{
+			break;
+		}
+	}
+
+	for (int i = 1; i <= 6; i++) {
+		int nodeID = PATHFIND::GET_NTH_CLOSEST_VEHICLE_NODE_ID(targetCoord.x, targetCoord.y, targetCoord.z, i, 0, 300, 300);
+		node = loaded_nodes[nodeID];
+		bool found = false;
+
+		for (int j = 0; j < node.links.size(); j++) {
+			link = node.links.at(j);
+
+			if (link.attr.shortcut || link.attr.width == -1 || link.linePoints.size() != 3) continue;
+
+			targetLinkDir.coord1 = link.linePoints.at(1).coord;
+			targetLinkDir.direction = link.direction;
+			targetLinkDir.coord2 = link.linePoints.at(2).coord;
+			found = true;
+
+			GRAPHICS::DRAW_LINE(link.coord.x, link.coord.y, link.coord.z, link.coord.x, link.coord.y, link.coord.z + 3, 255, 0, 0, 255);
+
+			break;
+		}
+		if (found)
+		{
+			break;
+		}
+	}
+
+	Vector3 playerCoord3;
+	playerCoord3.x = playerLinkDir.coord1.x - playerLinkDir.direction.x * 100; playerCoord3.y = playerLinkDir.coord1.y - playerLinkDir.direction.y * 100;
+	//GRAPHICS::DRAW_LINE(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerLinkDir.coord1.z + 1, playerCoord3.x, playerCoord3.y, playerLinkDir.coord1.z + 1, 255, 0, 0, 255);
+	Vector3 playerCoord4;
+	playerCoord4.x = playerLinkDir.coord2.x - playerLinkDir.direction.x * 100; playerCoord4.y = playerLinkDir.coord2.y - playerLinkDir.direction.y * 100;
+	//GRAPHICS::DRAW_LINE(playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerLinkDir.coord2.z + 1, playerCoord4.x, playerCoord4.y, playerLinkDir.coord2.z + 1, 255, 0, 0, 255);
+
+	Vector3 targetCoord3;
+	targetCoord3.x = targetLinkDir.coord1.x + targetLinkDir.direction.x * 100; targetCoord3.y = targetLinkDir.coord1.y + targetLinkDir.direction.y * 100;
+	//GRAPHICS::DRAW_LINE(targetLinkDir.coord1.x, targetLinkDir.coord1.y, targetLinkDir.coord1.z + 1, targetCoord3.x, targetCoord3.y, targetLinkDir.coord1.z + 1, 255, 0, 0, 255);
+	Vector3 targetCoord4;
+	targetCoord4.x = targetLinkDir.coord2.x + targetLinkDir.direction.x * 100; targetCoord4.y = targetLinkDir.coord2.y + targetLinkDir.direction.y * 100;
+	//GRAPHICS::DRAW_LINE(targetLinkDir.coord2.x, targetLinkDir.coord2.y, targetLinkDir.coord2.z + 1, targetCoord4.x, targetCoord4.y, targetLinkDir.coord2.z + 1, 255, 0, 0, 255);
+
+	float int_x, int_y;
+	get_line_intersection(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord3.x, playerCoord3.y,
+		targetLinkDir.coord1.x, targetLinkDir.coord1.y, targetCoord3.x, targetCoord3.y, &int_x, &int_y);
+	GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
+
+	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetLinkDir.coord1.x, targetLinkDir.coord1.y, playerCoord.z, 255, 0, 0, 255);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord3.x, playerCoord3.y, playerCoord.z, 255, 0, 0, 255);
+	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord.z, 255, 0, 0, 255);
+
+	get_line_intersection(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord3.x, playerCoord3.y,
+		targetLinkDir.coord2.x, targetLinkDir.coord2.y, targetCoord4.x, targetCoord4.y, &int_x, &int_y);
+	GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
+
+	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetLinkDir.coord2.x, targetLinkDir.coord2.y, playerCoord.z, 255, 0, 0, 255);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord.z, 255, 0, 0, 255);
+	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord3.x, playerCoord3.y, playerCoord.z, 255, 0, 0, 255);
+
+	get_line_intersection(playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord4.x, playerCoord4.y,
+		targetLinkDir.coord1.x, targetLinkDir.coord1.y, targetCoord3.x, targetCoord3.y, &int_x, &int_y);
+	GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
+
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord4.x, playerCoord4.y, playerCoord.z, 255, 0, 0, 255);
+	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord.z, 255, 0, 0, 255);
+	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetCoord3.x, targetCoord3.y, playerCoord.z, 255, 0, 0, 255);
+
+	get_line_intersection(playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord4.x, playerCoord4.y,
+		targetLinkDir.coord2.x, targetLinkDir.coord2.y, targetCoord4.x, targetCoord4.y, &int_x, &int_y);
+	GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
+
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord.z, 255, 0, 0, 255);
+	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord4.x, playerCoord4.y, playerCoord.z, 255, 0, 0, 255);
+	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetCoord4.x, targetCoord4.y, playerCoord.z, 255, 0, 0, 255);
+
+
+}
+
+void Script::set_target_info_shared_mem(SharedAgentMemory* shared, const std::vector<int>& actors, int playerVehicle)
+{
+	//int playerID = PLAYER::PLAYER_ID();
+	//int player_pedID = PLAYER::PLAYER_PED_ID();
+	//int playerVehicleID = PED::GET_VEHICLE_PED_IS_USING(player_pedID);
+	//BOOST_LOG_TRIVIAL(info) << "player vehicle id: " << playerVehicleID;
+
+	shared->num_targets = (int) (actors.size() - 1); //1 is ourself (player)
+
+	int idx = 0;
+	for (int i = 0; i < actors.size(); i++)
+	{
+
+		// ToDo: don't add player info
+		if (actors[i] != playerVehicle)
+		{
+			Vector3 position = ENTITY::GET_ENTITY_COORDS(actors[i], FALSE);
+
+			//true means this is relative to the frame of the actor
+			Vector3 speed = ENTITY::GET_ENTITY_SPEED_VECTOR(actors[i], true);
+
+			//auto spin = ENTITY::GET_ENTITY_ROTATION_VELOCITY(vehicle);
+			double heading = ENTITY::GET_ENTITY_HEADING(actors[i]);
+
+			shared->targets[idx].x= position.x;
+			shared->targets[idx].y = position.y;
+			shared->targets[idx].z = position.z;
+			shared->targets[idx].heading = heading;
+			shared->targets[idx].vel_x = speed.x;
+			shared->targets[idx].vel_y = speed.y;
+			shared->targets[idx].vel_z = speed.z;
+			idx++;
+
+			draw_intersection(ENTITY::GET_ENTITY_COORDS(playerVehicle, FALSE), position);
+		}
+	}
 }
 
 void Script::display_loading_paths_message()
@@ -553,28 +790,43 @@ void Script::main()
 		WAIT(100);
 	}
 
+
 	// Use NVIDIA's JSON scenario and reward definition language
-	s_scenarioManager.load("scenario.json");
+	s_scenarioManager.load("scenario2.json");
 	BOOST_LOG_TRIVIAL(info) << "sciprt main: done loading scenario";
-	shared->scenario_name = "intersection";
+
+	const char s_name[] = "intersection";
+	shared->scenario_name = s_name;
 	s_scenarioManager.run(ScriptHookSharedMemory::shared()->scenario_name);
+
+	std::ifstream file{ "archive.txt" };
+	boost::archive::text_iarchive ia{ file };
+	ia >> loaded_nodes;
+	BOOST_LOG_TRIVIAL(info) << "loaded path nodes";
 
 	while (true)
 	{
+		Vector3 currentPosition = ENTITY::GET_ENTITY_COORDS(vehicle, FALSE);
+		//status_text = "X: " + std::to_string(currentPosition.x) + " Y: " + std::to_string(currentPosition.y) + " Z: " + std::to_string(currentPosition.z);
+		//update_status_text();
+		//if (nodes.size() == 0)
+		//{
+		//	// nodes.cpp
+		//	if (PATHFIND::LOAD_ALL_PATH_NODES(TRUE))
+		//	{
+		//		populateNodes("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Grand Theft Auto V\\paths.xml");
+		//		BOOST_LOG_TRIVIAL(info) << "done populating";
+		//		BOOST_LOG_TRIVIAL(info) << "node map size " << nodes.size();
+		//		std::ofstream file{ "archive.txt" };
+		//		boost::archive::text_oarchive oa{ file };
+		//		oa << nodes;
+		//		PATHFIND::LOAD_ALL_PATH_NODES(FALSE);
+		//	}
+		//}
 
 		if (iter % 100 == 0) // Do this every second as the game seems to unset certain mod settings every once in a while
 		{
 			refresh(player, player_ped, vehicle, shared);
-		}
-
-
-		// receive reset signal from universe client?
-		if (shared->should_reset_agent || isKeyJustUp(VK_F11))
-		{
-			BOOST_LOG_TRIVIAL(info) << "Resetting agent";
-			//s_scenarioManager.reset();
-			reset_agent(shared);
-			shared->should_reset_agent = false;
 		}
 
 		// use a hotkey to reset the scenario/restart episode
@@ -590,9 +842,20 @@ void Script::main()
 			s_scenarioManager.onGameLoop();
 		}
 
+		// receive reset signal from universe client?
+		if (shared->should_reset_agent || isKeyJustUp(VK_F11))
+		{
+			BOOST_LOG_TRIVIAL(info) << "Resetting agent";
+			reset_agent(shared);
+			shared->should_reset_agent = false;
+		}
 
 		// send game info to environment interface
 		set_reward_and_info_shared_mem(shared, player, vehicle);
+
+
+		const std::vector<int>& scene_actor_ids = s_scenarioManager.currentScenario().actorIDs();
+		set_target_info_shared_mem(shared, scene_actor_ids, vehicle);
 
 
 		WAIT(10);

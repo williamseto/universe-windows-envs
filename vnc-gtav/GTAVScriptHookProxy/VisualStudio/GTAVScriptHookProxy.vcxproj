@@ -72,7 +72,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
-    <NuGetPackageImportStamp>e0a892c5</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>97873007</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -99,6 +99,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>..\vendor\ScriptHookV\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>C:\Workspace\universe-windows-envs\vnc-gtav\GTAVScriptHookProxy\vendor\ScriptHookV;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>echo copy "$(ProjectDir)..\bin\GTAVScriptHookProxy.asi" "$(GTAV_DIR)"
@@ -120,6 +121,7 @@ copy "$(ProjectDir)..\bin\GTAVScriptHookProxy.asi" "$(GTAV_DIR)"</Command>
     <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
     <Import Project="..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_log-vc120.1.61.0.0\build\native\boost_log-vc120.targets" Condition="Exists('..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_log-vc120.1.61.0.0\build\native\boost_log-vc120.targets')" />
     <Import Project="..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_date_time-vc120.1.61.0.0\build\native\boost_date_time-vc120.targets" Condition="Exists('..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_date_time-vc120.1.61.0.0\build\native\boost_date_time-vc120.targets')" />
+    <Import Project="..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_serialization-vc120.1.61.0.0\build\native\boost_serialization-vc120.targets" Condition="Exists('..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_serialization-vc120.1.61.0.0\build\native\boost_serialization-vc120.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -135,5 +137,6 @@ copy "$(ProjectDir)..\bin\GTAVScriptHookProxy.asi" "$(GTAV_DIR)"</Command>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_log-vc120.1.61.0.0\build\native\boost_log-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_log-vc120.1.61.0.0\build\native\boost_log-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_date_time-vc120.1.61.0.0\build\native\boost_date_time-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_date_time-vc120.1.61.0.0\build\native\boost_date_time-vc120.targets'))" />
+    <Error Condition="!Exists('..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_serialization-vc120.1.61.0.0\build\native\boost_serialization-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\vnc-windows\CommonController\VisualStudio\packages\boost_serialization-vc120.1.61.0.0\build\native\boost_serialization-vc120.targets'))" />
   </Target>
 </Project>

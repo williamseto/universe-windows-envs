@@ -3,6 +3,7 @@
 #include "script.h"
 #include <unordered_map>
 #include <natives.h>
+#include <boost/log/trivial.hpp>
 
 std::unordered_map<int, tNode> nodes;
 
@@ -18,7 +19,9 @@ void populateNodes(const char* pathsfile){
 	tinyxml2::XMLElement* ref1;
 	tinyxml2::XMLElement* ref2;
 
-	doc.LoadFile(pathsfile);
+	int open_err = doc.LoadFile(pathsfile);
+	BOOST_LOG_TRIVIAL(info) << "xmlerror: " << open_err;
+
 	object = doc.FirstChildElement()->FirstChildElement()->FirstChildElement();
 	for (object; object; object = object->NextSiblingElement()) {
 		if (object->Attribute("class", "vehiclenode")) {

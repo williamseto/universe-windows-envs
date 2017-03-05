@@ -18,11 +18,13 @@ Nvidia::Scenario::~Scenario()
 	m_actors.clear();
 }
 
+
 void Nvidia::Scenario::setupScenario(DWORD currentTick)
 {
 	m_startTick = currentTick;
 
 	m_actorIds.resize(m_actors.size());
+	m_actorIds.clear();
 
 	for each (auto & actor in m_actors)
 	{
@@ -49,12 +51,11 @@ void Nvidia::Scenario::setupScenario(DWORD currentTick)
 
 		CAM::SET_CAM_ROT(m_camera, rotation.x, rotation.y, rotation.z, 2);
 
-		CAM::SET_CAM_ACTIVE(m_camera, TRUE);
+		//CAM::SET_CAM_ACTIVE(m_camera, TRUE);
 
-		CAM::RENDER_SCRIPT_CAMS(TRUE, FALSE, m_camera, TRUE, FALSE);
+		//CAM::RENDER_SCRIPT_CAMS(TRUE, FALSE, m_camera, TRUE, FALSE);
 	}
 	
-
 	m_status = Running;
 }
 
@@ -65,9 +66,9 @@ void Nvidia::Scenario::onTick(DWORD currentTick)
 		actor->onTick(currentTick);
 	}
 
-	auto rotation = ENTITY::GET_ENTITY_ROTATION(m_playerActor->playerVehicle(), FALSE);
+	//auto rotation = ENTITY::GET_ENTITY_ROTATION(m_playerActor->playerVehicle(), FALSE);
 
-	CAM::SET_CAM_ROT(m_camera, rotation.x, rotation.y, rotation.z, 2);
+	//CAM::SET_CAM_ROT(m_camera, rotation.x, rotation.y, rotation.z, 2);
 
 	if (m_status == Running && ((currentTick - m_startTick) > m_lengthInMilliseconds))
 	{

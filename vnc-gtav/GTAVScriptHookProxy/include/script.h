@@ -3,8 +3,9 @@
 #include "ScenarioManager.h"
 #include "ScriptHookSharedMemory.h"
 #include "SharedAgentMemory.h"
+#include <vector>
 
-//#define USE_NVIDIA_SCENARIOS
+#define USE_NVIDIA_SCENARIOS
 
 namespace OpenAIGym
 {
@@ -28,6 +29,7 @@ namespace OpenAIGym
 		static void get_acceleration(Vector3 speed, Vector3& acceleration, Vector3& jariness);
 		static void get_time_since_drove_against_traffic(int player, int& time_since_drove_against_traffic);
 		static void set_reward_and_info_shared_mem(SharedAgentMemory* shared, int player, int vehicle);
+		static void set_target_info_shared_mem(SharedAgentMemory* shared, const std::vector<int>& actors, int playerVehicle);
 		static void display_loading_paths_message();
 		static void write_shared();
 		static void set_camera(const int vehicle, SharedAgentMemory* shared, const int curr_vehicle);

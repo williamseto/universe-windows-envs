@@ -124,5 +124,4 @@ void quick_reset()
 {
 	// hotkey implemented on scripthook side to restart episode
 	send_key("F9");
-	AU3_Sleep(1500);
 }

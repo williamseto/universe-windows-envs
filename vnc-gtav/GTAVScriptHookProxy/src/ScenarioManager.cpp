@@ -84,7 +84,7 @@ void Nvidia::ScenarioManager::run(const std::string & scenarioName)
 		
 	});
 
-	BOOST_LOG_TRIVIAL(info) << "SM: couldnt find scenario";
+	BOOST_LOG_TRIVIAL(info) << "SM: found scenario: " << (*m_currentScenario)->name();
 	if (m_currentScenario == m_scenarios.end())
 	{
 		BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << " Unable to find a scenario name: " << scenarioName;

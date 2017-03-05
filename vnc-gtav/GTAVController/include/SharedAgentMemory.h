@@ -22,6 +22,20 @@ struct Vector
 	double z;
 };
 
+struct TargetInfo
+{
+	double x;
+	double y;
+	double z;
+	double heading;
+	//double speed;
+	double vel_x;
+	double vel_y;
+	double vel_z;
+
+	//Vector fwd_vec;
+};
+
 struct SharedAgentMemory
 {
 	double reward;
@@ -72,7 +86,9 @@ struct SharedAgentMemory
 	int time_since_drove_against_traffic;
 	Vector forward_vector;
 	AgentTime time;
-	const char * scenario_name;
+	int num_targets;
+	TargetInfo targets[8];
+	const char * scenario_name; //how much memory will be allocated??
 };
 
 #endif // !GTAV_SHARED_AGENT_MEMORY_H_
