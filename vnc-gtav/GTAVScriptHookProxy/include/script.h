@@ -5,7 +5,7 @@
 #include "SharedAgentMemory.h"
 #include <vector>
 
-#define USE_NVIDIA_SCENARIOS
+//#define USE_NVIDIA_SCENARIOS
 
 namespace OpenAIGym
 {
