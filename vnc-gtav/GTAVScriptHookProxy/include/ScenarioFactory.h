@@ -20,6 +20,8 @@ namespace Nvidia
 
 		static IActor* createLightActor(const boost::property_tree::basic_ptree<std::string, std::string> & item);
 
+		static IActor* createObjectActor(const boost::property_tree::basic_ptree<std::string, std::string> & item);
+
 		static std::string loadRewardFunction(const std::string & fileName);
 
 		static AbstractVehicleActor::VehicleType findVehicleType(const std::string & type);
