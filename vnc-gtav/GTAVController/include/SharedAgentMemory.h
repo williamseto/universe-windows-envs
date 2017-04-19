@@ -41,13 +41,16 @@ struct SharedAgentMemory
 	double reward;
 
 	// N.B. ScriptHook driven actions not currently implemented. vJoy used instead.
+	bool use_agent_actions;
 	double action_throttle; //[0,1]
 	double action_brake; //[0,1]
 	double action_steer; //[-1,1]. -1 is left, 1 is right
+	double action_set_forward_vel; //almost like throttle, except we can automatically set the speed (m/s)
 
 	double x_coord;
 	double y_coord;
 	double z_coord;
+	bool use_scenario_dest; //if true, uses destination for the "drivetocoordinate" player task in scenario file
 	double dest_x;
 	double dest_y;
 	double dest_z;
@@ -88,6 +91,8 @@ struct SharedAgentMemory
 	AgentTime time;
 	int num_targets;
 	TargetInfo targets[8];
+	int num_scans;
+	Vector scan_info[36];
 	const char * scenario_name; //how much memory will be allocated??
 };
 

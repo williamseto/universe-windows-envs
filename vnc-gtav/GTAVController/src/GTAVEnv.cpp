@@ -137,8 +137,6 @@ void GTAVEnv::sendReward_()
 	info["distance_from_destination"] = shared_->distance_from_destination;
 
 	//add target info
-	//BOOST_LOG_SEV(lg_, ls::warning) << "scenario: " << shared_->scenario_name;
-	BOOST_LOG_SEV(lg_, ls::warning) << "time against traffic: " << shared_->time_since_drove_against_traffic;
 	for (int n = 0; n < shared_->num_targets; n++)
 	{
 		Json::Value target_info;
@@ -152,8 +150,18 @@ void GTAVEnv::sendReward_()
 		target_info["heading"] = shared_->targets[n].heading;
 
 		info["targets"].append(target_info);
+	}
 
-		//BOOST_LOG_SEV(lg_, ls::warning) << shared_->targets[n].x;
+	// add scan info
+	for (int n = 0; n < shared_->num_scans; n++)
+	{
+		Json::Value scan_info;
+
+		scan_info["x"] = shared_->scan_info[n].x;
+		scan_info["y"] = shared_->scan_info[n].y;
+		scan_info["z"] = shared_->scan_info[n].z;
+
+		info["scans"].append(scan_info);
 	}
 
 	double reward;
@@ -248,5 +256,11 @@ void GTAVEnv::change_settings(const Json::Value& settings)
 	{
 		(*shared_).desired_cam_z_offset = settings[2].asDouble();
 		(*shared_).use_custom_camera = true;
+	}
+
+	if (settings[1].asString() == "set_velocity")
+	{
+		(*shared_).action_set_forward_vel = settings[2].asDouble();
+		(*shared_).use_agent_actions = true;
 	}
 }

@@ -59,17 +59,21 @@ GTAVRewardCalculator::~GTAVRewardCalculator()
 
 void GTAVRewardCalculator::set_destination(SharedAgentMemory* shared)
 {
-	if(winding_road_direction_is_down_)
+	if (!shared->use_scenario_dest)
 	{
-		shared->dest_x = WINDING_BOTTOM_X;
-		shared->dest_y = WINDING_BOTTOM_Y;
-		shared->dest_z = WINDING_BOTTOM_Z;
-	} 
-	else
-	{
-		shared->dest_x = WINDING_TOP_X;
-		shared->dest_y = WINDING_TOP_Y;
-		shared->dest_z = WINDING_TOP_Z;
+		// default case from deep_drive()
+		if (winding_road_direction_is_down_)
+		{
+			shared->dest_x = WINDING_BOTTOM_X;
+			shared->dest_y = WINDING_BOTTOM_Y;
+			shared->dest_z = WINDING_BOTTOM_Z;
+		}
+		else
+		{
+			shared->dest_x = WINDING_TOP_X;
+			shared->dest_y = WINDING_TOP_Y;
+			shared->dest_z = WINDING_TOP_Z;
+		}
 	}
 }
 

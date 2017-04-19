@@ -446,17 +446,18 @@ void Script::set_reward_and_info_shared_mem(SharedAgentMemory* shared, int playe
 inline void draw_intersection(Vector3 playerCoord, Vector3 targetCoord)
 {
 	targetCoord.x = 1718; targetCoord.y = 3645; targetCoord.z = 35.06;
-	playerCoord.x = 1805.271; playerCoord.y = 3656.37; playerCoord.z = 33.88629;
+	//playerCoord.x = 1805.271; playerCoord.y = 3656.37; playerCoord.z = 33.88629;
+	playerCoord.x = 1784.779; playerCoord.y = 3687.421; playerCoord.z = 33.85;
 
 	tNode node;
 	tLink link;
 
-	// get some number of nodes. nodes are basically locations denoting somewhere on a road
+	// get some number of nodes. nodes are basically locations denoting a point on the road
 
 
 	tLinkDir playerLinkDir;
 	tLinkDir targetLinkDir;
-	for (int i = 1; i <= 6; i++) {
+	for (int i = 1; i <= 20; i++) {
 		int nodeID = PATHFIND::GET_NTH_CLOSEST_VEHICLE_NODE_ID(playerCoord.x, playerCoord.y, playerCoord.z, i, 0, 300, 300);
 		node = loaded_nodes[nodeID];
 
@@ -481,7 +482,10 @@ inline void draw_intersection(Vector3 playerCoord, Vector3 targetCoord)
 			playerLinkDir.coord2 = link.linePoints.at(2).coord;
 			found = true;
 
-			GRAPHICS::DRAW_LINE(link.coord.x, link.coord.y, link.coord.z, link.coord.x, link.coord.y, link.coord.z + 3, 255, 0, 0, 255);
+			//BOOST_LOG_TRIVIAL(info) << "link (road) width: " << SYSTEM::VDIST(playerLinkDir.coord1.x, playerLinkDir.coord1.y, 0, playerLinkDir.coord2.x, playerLinkDir.coord2.y, 0);
+
+			//GRAPHICS::DRAW_LINE(link.coord.x, link.coord.y, link.coord.z, link.coord.x, link.coord.y, link.coord.z + 3, 255, 0, 0, 255);
+			GRAPHICS::DRAW_LINE(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerLinkDir.coord1.z, playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerLinkDir.coord2.z, 255, 0, 0, 255);
 
 			//if (bunchofpoints.size() > 0)
 			//{
@@ -522,87 +526,143 @@ inline void draw_intersection(Vector3 playerCoord, Vector3 targetCoord)
 			//}
 
 			//// should we break or not? empirically it looks like multiple links are usually almost the same
-			break;
+			//break;
 		}
-		if (found)
-		{
-			break;
-		}
+		//if (found)
+		//{
+		//	break;
+		//}
 	}
 
-	for (int i = 1; i <= 6; i++) {
-		int nodeID = PATHFIND::GET_NTH_CLOSEST_VEHICLE_NODE_ID(targetCoord.x, targetCoord.y, targetCoord.z, i, 0, 300, 300);
-		node = loaded_nodes[nodeID];
-		bool found = false;
+	//for (int i = 1; i <= 6; i++) {
+	//	int nodeID = PATHFIND::GET_NTH_CLOSEST_VEHICLE_NODE_ID(targetCoord.x, targetCoord.y, targetCoord.z, i, 0, 300, 300);
+	//	node = loaded_nodes[nodeID];
+	//	bool found = false;
 
-		for (int j = 0; j < node.links.size(); j++) {
-			link = node.links.at(j);
+	//	for (int j = 0; j < node.links.size(); j++) {
+	//		link = node.links.at(j);
 
-			if (link.attr.shortcut || link.attr.width == -1 || link.linePoints.size() != 3) continue;
+	//		if (link.attr.shortcut || link.attr.width == -1 || link.linePoints.size() != 3) continue;
 
-			targetLinkDir.coord1 = link.linePoints.at(1).coord;
-			targetLinkDir.direction = link.direction;
-			targetLinkDir.coord2 = link.linePoints.at(2).coord;
-			found = true;
+	//		targetLinkDir.coord1 = link.linePoints.at(1).coord;
+	//		targetLinkDir.direction = link.direction;
+	//		targetLinkDir.coord2 = link.linePoints.at(2).coord;
+	//		found = true;
 
-			GRAPHICS::DRAW_LINE(link.coord.x, link.coord.y, link.coord.z, link.coord.x, link.coord.y, link.coord.z + 3, 255, 0, 0, 255);
+	//		GRAPHICS::DRAW_LINE(link.coord.x, link.coord.y, link.coord.z, link.coord.x, link.coord.y, link.coord.z + 3, 255, 0, 0, 255);
 
-			break;
-		}
-		if (found)
-		{
-			break;
-		}
-	}
+	//		break;
+	//	}
+	//	if (found)
+	//	{
+	//		break;
+	//	}
+	//}
 
-	Vector3 playerCoord3;
-	playerCoord3.x = playerLinkDir.coord1.x - playerLinkDir.direction.x * 100; playerCoord3.y = playerLinkDir.coord1.y - playerLinkDir.direction.y * 100;
-	//GRAPHICS::DRAW_LINE(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerLinkDir.coord1.z + 1, playerCoord3.x, playerCoord3.y, playerLinkDir.coord1.z + 1, 255, 0, 0, 255);
-	Vector3 playerCoord4;
-	playerCoord4.x = playerLinkDir.coord2.x - playerLinkDir.direction.x * 100; playerCoord4.y = playerLinkDir.coord2.y - playerLinkDir.direction.y * 100;
-	//GRAPHICS::DRAW_LINE(playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerLinkDir.coord2.z + 1, playerCoord4.x, playerCoord4.y, playerLinkDir.coord2.z + 1, 255, 0, 0, 255);
+	//Vector3 playerCoord3;
+	//playerCoord3.x = playerLinkDir.coord1.x - playerLinkDir.direction.x * 100; playerCoord3.y = playerLinkDir.coord1.y - playerLinkDir.direction.y * 100;
+	////GRAPHICS::DRAW_LINE(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerLinkDir.coord1.z + 1, playerCoord3.x, playerCoord3.y, playerLinkDir.coord1.z + 1, 255, 0, 0, 255);
+	//Vector3 playerCoord4;
+	//playerCoord4.x = playerLinkDir.coord2.x - playerLinkDir.direction.x * 100; playerCoord4.y = playerLinkDir.coord2.y - playerLinkDir.direction.y * 100;
+	////GRAPHICS::DRAW_LINE(playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerLinkDir.coord2.z + 1, playerCoord4.x, playerCoord4.y, playerLinkDir.coord2.z + 1, 255, 0, 0, 255);
 
-	Vector3 targetCoord3;
-	targetCoord3.x = targetLinkDir.coord1.x + targetLinkDir.direction.x * 100; targetCoord3.y = targetLinkDir.coord1.y + targetLinkDir.direction.y * 100;
-	//GRAPHICS::DRAW_LINE(targetLinkDir.coord1.x, targetLinkDir.coord1.y, targetLinkDir.coord1.z + 1, targetCoord3.x, targetCoord3.y, targetLinkDir.coord1.z + 1, 255, 0, 0, 255);
-	Vector3 targetCoord4;
-	targetCoord4.x = targetLinkDir.coord2.x + targetLinkDir.direction.x * 100; targetCoord4.y = targetLinkDir.coord2.y + targetLinkDir.direction.y * 100;
-	//GRAPHICS::DRAW_LINE(targetLinkDir.coord2.x, targetLinkDir.coord2.y, targetLinkDir.coord2.z + 1, targetCoord4.x, targetCoord4.y, targetLinkDir.coord2.z + 1, 255, 0, 0, 255);
+	//Vector3 targetCoord3;
+	//targetCoord3.x = targetLinkDir.coord1.x + targetLinkDir.direction.x * 100; targetCoord3.y = targetLinkDir.coord1.y + targetLinkDir.direction.y * 100;
+	////GRAPHICS::DRAW_LINE(targetLinkDir.coord1.x, targetLinkDir.coord1.y, targetLinkDir.coord1.z + 1, targetCoord3.x, targetCoord3.y, targetLinkDir.coord1.z + 1, 255, 0, 0, 255);
+	//Vector3 targetCoord4;
+	//targetCoord4.x = targetLinkDir.coord2.x + targetLinkDir.direction.x * 100; targetCoord4.y = targetLinkDir.coord2.y + targetLinkDir.direction.y * 100;
+	////GRAPHICS::DRAW_LINE(targetLinkDir.coord2.x, targetLinkDir.coord2.y, targetLinkDir.coord2.z + 1, targetCoord4.x, targetCoord4.y, targetLinkDir.coord2.z + 1, 255, 0, 0, 255);
 
-	float int_x, int_y;
-	get_line_intersection(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord3.x, playerCoord3.y,
-		targetLinkDir.coord1.x, targetLinkDir.coord1.y, targetCoord3.x, targetCoord3.y, &int_x, &int_y);
-	GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
+	//float int_x, int_y;
+	//get_line_intersection(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord3.x, playerCoord3.y,
+	//	targetLinkDir.coord1.x, targetLinkDir.coord1.y, targetCoord3.x, targetCoord3.y, &int_x, &int_y);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
 
-	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetLinkDir.coord1.x, targetLinkDir.coord1.y, playerCoord.z, 255, 0, 0, 255);
-	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord3.x, playerCoord3.y, playerCoord.z, 255, 0, 0, 255);
-	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord.z, 255, 0, 0, 255);
-
-	get_line_intersection(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord3.x, playerCoord3.y,
-		targetLinkDir.coord2.x, targetLinkDir.coord2.y, targetCoord4.x, targetCoord4.y, &int_x, &int_y);
-	GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
-
-	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetLinkDir.coord2.x, targetLinkDir.coord2.y, playerCoord.z, 255, 0, 0, 255);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetLinkDir.coord1.x, targetLinkDir.coord1.y, playerCoord.z, 255, 0, 0, 255);
+	////GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord3.x, playerCoord3.y, playerCoord.z, 255, 0, 0, 255);
 	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord.z, 255, 0, 0, 255);
-	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord3.x, playerCoord3.y, playerCoord.z, 255, 0, 0, 255);
 
-	get_line_intersection(playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord4.x, playerCoord4.y,
-		targetLinkDir.coord1.x, targetLinkDir.coord1.y, targetCoord3.x, targetCoord3.y, &int_x, &int_y);
-	GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
+	//get_line_intersection(playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord3.x, playerCoord3.y,
+	//	targetLinkDir.coord2.x, targetLinkDir.coord2.y, targetCoord4.x, targetCoord4.y, &int_x, &int_y);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
 
-	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord4.x, playerCoord4.y, playerCoord.z, 255, 0, 0, 255);
-	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord.z, 255, 0, 0, 255);
-	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetCoord3.x, targetCoord3.y, playerCoord.z, 255, 0, 0, 255);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetLinkDir.coord2.x, targetLinkDir.coord2.y, playerCoord.z, 255, 0, 0, 255);
+	////GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord1.x, playerLinkDir.coord1.y, playerCoord.z, 255, 0, 0, 255);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord3.x, playerCoord3.y, playerCoord.z, 255, 0, 0, 255);
 
-	get_line_intersection(playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord4.x, playerCoord4.y,
-		targetLinkDir.coord2.x, targetLinkDir.coord2.y, targetCoord4.x, targetCoord4.y, &int_x, &int_y);
-	GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
+	//get_line_intersection(playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord4.x, playerCoord4.y,
+	//	targetLinkDir.coord1.x, targetLinkDir.coord1.y, targetCoord3.x, targetCoord3.y, &int_x, &int_y);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
 
+	////GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord4.x, playerCoord4.y, playerCoord.z, 255, 0, 0, 255);
 	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord.z, 255, 0, 0, 255);
-	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord4.x, playerCoord4.y, playerCoord.z, 255, 0, 0, 255);
-	GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetCoord4.x, targetCoord4.y, playerCoord.z, 255, 0, 0, 255);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetCoord3.x, targetCoord3.y, playerCoord.z, 255, 0, 0, 255);
+
+	//get_line_intersection(playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord4.x, playerCoord4.y,
+	//	targetLinkDir.coord2.x, targetLinkDir.coord2.y, targetCoord4.x, targetCoord4.y, &int_x, &int_y);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, targetLinkDir.coord1.z, int_x, int_y, targetLinkDir.coord1.z + 3, 255, 0, 0, 255);
+
+	////GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerLinkDir.coord2.x, playerLinkDir.coord2.y, playerCoord.z, 255, 0, 0, 255);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, playerCoord4.x, playerCoord4.y, playerCoord.z, 255, 0, 0, 255);
+	//GRAPHICS::DRAW_LINE(int_x, int_y, playerCoord.z, targetCoord4.x, targetCoord4.y, playerCoord.z, 255, 0, 0, 255);
 
 
+}
+
+
+#define sind(x) (sin(fmod((x),360) * M_PI / 180))
+#define cosd(x) (cos(fmod((x),360) * M_PI / 180))
+
+void set_scan_info(SharedAgentMemory* shared, int playerVehicle)
+{
+	float startX, startY, startZ, targetX, targetY, targetZ;
+
+	// start position of the raycast
+	startX = shared->x_coord; startY = shared->y_coord; startZ = shared->z_coord + 0.5;
+
+	targetZ = startZ;
+	int vehicleHeading = (int)shared->heading;
+
+	Vector3 hitPositionArg;
+	BOOL hitSomethingArg;
+	int entityHandleArg;
+	Vector3 surfaceNormalArg;
+
+	int scan_count = 0;
+	for (int deg = -20 + vehicleHeading; deg <= 200 + vehicleHeading; deg += 10)
+	{
+		double rad = deg * M_PI / 180;
+
+		targetX = startX + cosd(deg) * 80;
+		targetY = startY + sind(deg) * 80;
+
+		int raycastHandle = WORLDPROBE::_CAST_RAY_POINT_TO_POINT(startX, startY, startZ, targetX, targetY, targetZ, -1, playerVehicle, 7);
+
+		int raycastResult = WORLDPROBE::_GET_RAYCAST_RESULT(raycastHandle, &hitSomethingArg, &hitPositionArg, &surfaceNormalArg, &entityHandleArg);
+
+		if (hitSomethingArg)
+		{
+			shared->scan_info[scan_count].x = hitPositionArg.x;
+			shared->scan_info[scan_count].y = hitPositionArg.y;
+			shared->scan_info[scan_count].z = hitPositionArg.z;
+		}
+		else
+		{
+			shared->scan_info[scan_count].x = targetX;
+			shared->scan_info[scan_count].y = targetY;
+			shared->scan_info[scan_count].z = targetZ;
+		}
+		scan_count++;
+	}
+	shared->num_scans = scan_count;
+}
+
+void set_scenario_dest_shared_mem(SharedAgentMemory* shared, Vector3 destination)
+{
+	shared->use_scenario_dest = true;
+	shared->dest_x = destination.x;
+	shared->dest_y = destination.y;
+	shared->dest_z = destination.z;
 }
 
 void Script::set_target_info_shared_mem(SharedAgentMemory* shared, const std::vector<int>& actors, int playerVehicle)
@@ -610,7 +670,6 @@ void Script::set_target_info_shared_mem(SharedAgentMemory* shared, const std::ve
 	//int playerID = PLAYER::PLAYER_ID();
 	//int player_pedID = PLAYER::PLAYER_PED_ID();
 	//int playerVehicleID = PED::GET_VEHICLE_PED_IS_USING(player_pedID);
-	//BOOST_LOG_TRIVIAL(info) << "player vehicle id: " << playerVehicleID;
 
 	shared->num_targets = (int) (actors.size() - 1); //1 is ourself (player)
 
@@ -638,6 +697,7 @@ void Script::set_target_info_shared_mem(SharedAgentMemory* shared, const std::ve
 			shared->targets[idx].vel_z = speed.z;
 			idx++;
 
+			// debug intersection node locations
 			draw_intersection(ENTITY::GET_ENTITY_COORDS(playerVehicle, FALSE), position);
 		}
 	}
@@ -721,6 +781,7 @@ void Script::reset_agent(SharedAgentMemory* shared)
 	(*shared).script_hook_loadtime = int(now);
 	BOOST_LOG_TRIVIAL(info) << "Set scripthook load time";
 	(*shared).use_custom_camera = false;
+	(*shared).use_agent_actions = false;
 
 	//	// Center mirror
 	//	(*agent_data)->desired_cam_x_offset = 0;
@@ -792,14 +853,15 @@ void Script::main()
 
 
 	// Use NVIDIA's JSON scenario and reward definition language
-	s_scenarioManager.load("scenario2.json");
+	s_scenarioManager.load("intersection1.json");
+	//s_scenarioManager.load("C:\\Workspace\\universe\-windows\-envs\\vnc\-gtav\\GTAVScriptHookProxy\\scenarios\\intersection1.json");
 	BOOST_LOG_TRIVIAL(info) << "sciprt main: done loading scenario";
 
 	const char s_name[] = "intersection";
 	shared->scenario_name = s_name;
 	s_scenarioManager.run(ScriptHookSharedMemory::shared()->scenario_name);
 
-	std::ifstream file{ "archive.txt" };
+	std::ifstream file{ "pathnodes.txt" };
 	boost::archive::text_iarchive ia{ file };
 	ia >> loaded_nodes;
 	BOOST_LOG_TRIVIAL(info) << "loaded path nodes";
@@ -857,8 +919,20 @@ void Script::main()
 		const std::vector<int>& scene_actor_ids = s_scenarioManager.currentScenario().actorIDs();
 		set_target_info_shared_mem(shared, scene_actor_ids, vehicle);
 
+		set_scan_info(shared, vehicle);
+
+		if (shared->use_agent_actions)
+		{
+			VEHICLE::SET_VEHICLE_FORWARD_SPEED(vehicle, shared->action_set_forward_vel);
+		}
+
+		set_scenario_dest_shared_mem(shared, s_scenarioManager.currentScenario().playerActor()->destination());
 
 		WAIT(10);
+		// set hood cam
+		//CAM::SET_FOLLOW_PED_CAM_VIEW_MODE(4);
+		//CAM::SET_FOLLOW_VEHICLE_CAM_VIEW_MODE(4);
+		//CAM::SET_GAMEPLAY_CAM_RELATIVE_HEADING(0);
 		//update_status_text();
 		iter++;
 	}
