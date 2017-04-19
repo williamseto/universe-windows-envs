@@ -1,6 +1,7 @@
 
 #include "Scenario.h"
 #include "natives.h"
+#include "ObjectActor.h"
 
 Nvidia::Scenario::Scenario() : m_lengthInMilliseconds(0), m_playerActor(nullptr), m_startTick(0), m_status(NotStarted), m_camera(0)
 {
@@ -29,7 +30,12 @@ void Nvidia::Scenario::setupScenario(DWORD currentTick)
 	for each (auto & actor in m_actors)
 	{
 		actor->setupActor(currentTick);
-		m_actorIds.push_back(actor->id());
+
+		// don't add objects as actors
+		if (!dynamic_cast<ObjectActor*>(actor))
+		{
+			m_actorIds.push_back(actor->id());
+		}
 	}
 
 	GAMEPLAY::SET_TIME_SCALE(m_timeScale);
@@ -54,6 +60,7 @@ void Nvidia::Scenario::setupScenario(DWORD currentTick)
 		//CAM::SET_CAM_ACTIVE(m_camera, TRUE);
 
 		//CAM::RENDER_SCRIPT_CAMS(TRUE, FALSE, m_camera, TRUE, FALSE);
+
 	}
 	
 	m_status = Running;

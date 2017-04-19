@@ -7,7 +7,9 @@
 #include <fstream>
 #include "AbstractVehicleActor.h"
 #include <boost\log\trivial.hpp>
+#include <boost\optional\optional.hpp>
 #include "LightActor.h"
+#include "ObjectActor.h"
 
 using namespace Nvidia;
 
@@ -30,7 +32,7 @@ Scenario* Nvidia::ScenarioFactory::createScenario(const boost::property_tree::ba
 	ret->m_cameraPosition.y = cameraPosition.get("y", 0.0f);
 	ret->m_cameraPosition.z = cameraPosition.get("z", 0.0f);
 
-	ret->m_removeOtherEntities = item.get("removeOtherEntities", true);
+	ret->m_removeOtherEntities = item.get("removeOtherEntities", false);
 
 	ret->m_timeScale = item.get("timeScale", 1.0f);
 
@@ -54,7 +56,7 @@ Scenario* Nvidia::ScenarioFactory::createScenario(const boost::property_tree::ba
 			ret->m_playerActor = (PlayerActor *)createdActor;
 
 			ret->m_actors.emplace_back(createdActor);
-			BOOST_LOG_TRIVIAL(info) << "SF: created player actor!";
+			BOOST_LOG_TRIVIAL(info) << "SF: created player actor";
 		}
 		else if (type == "pedestrian")
 		{
@@ -67,7 +69,6 @@ Scenario* Nvidia::ScenarioFactory::createScenario(const boost::property_tree::ba
 			createdActor = createVehicleActor(data);
 
 			ret->m_actors.emplace_back(createdActor);
-			BOOST_LOG_TRIVIAL(info) << "SF: created vehicle actor!" << createdActor;
 		}
 		else if (type == "light")
 		{
@@ -75,21 +76,45 @@ Scenario* Nvidia::ScenarioFactory::createScenario(const boost::property_tree::ba
 
 			ret->m_actors.emplace_back(createdActor);
 		}
+		else if (type == "object")
+		{
+			createdActor = createObjectActor(data);
+
+			ret->m_actors.emplace_back(createdActor);
+
+			BOOST_LOG_TRIVIAL(info) << "SF: created object actor";
+		}
 		else
 			throw std::exception("Unknown actor type sent into method");
 
 		if (createdActor != nullptr)
 		{
-			for (auto & task : data.get_child("tasks"))
+			auto b_tasks = data.get_child_optional("tasks");
+
+			if (b_tasks)
 			{
-				createdActor->addTask(TaskFactory::createTask(task.second));
+				for (auto & task : data.get_child("tasks"))
+				{
+					createdActor->addTask(TaskFactory::createTask(task.second));
+				}
 			}
 		}
-		
-		BOOST_LOG_TRIVIAL(info) << "SF: created scenario!";
 	}
 	BOOST_LOG_TRIVIAL(info) << "SF: done creating scenarios!";
 	return ret;
+}
+
+IActor* ScenarioFactory::createObjectActor(const boost::property_tree::basic_ptree<std::string, std::string> & item)
+{
+	Vector3 pos, rot;
+
+	std::string objectName = item.get<std::string>("objectName", "");
+
+	pos.x = item.get("x", 0.0f); pos.y = item.get("y", 0.0f); pos.z = item.get("z", 0.0f);
+
+	rot.x = item.get("rot_x", 0.0f); rot.y = item.get("rot_y", 0.0f); rot.z = item.get("rot_z", 0.0f);
+
+	return new ObjectActor(objectName, pos, rot);
 }
 
 IActor* ScenarioFactory::createLightActor(const boost::property_tree::basic_ptree<std::string, std::string> & item)

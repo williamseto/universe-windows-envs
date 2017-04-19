@@ -140,6 +140,9 @@
     <ClInclude Include="..\include\Keyboard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\ObjectActor.h">
+      <Filter>Header Files\Scenario</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

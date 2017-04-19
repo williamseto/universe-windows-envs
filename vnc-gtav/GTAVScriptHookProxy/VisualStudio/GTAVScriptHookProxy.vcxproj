@@ -34,6 +34,7 @@
     <ClInclude Include="..\include\Keyboard.h" />
     <ClInclude Include="..\include\LightActor.h" />
     <ClInclude Include="..\include\nodes.h" />
+    <ClInclude Include="..\include\ObjectActor.h" />
     <ClInclude Include="..\include\PedestrianActor.h" />
     <ClInclude Include="..\include\PedList.h" />
     <ClInclude Include="..\include\PlayerActor.h" />
