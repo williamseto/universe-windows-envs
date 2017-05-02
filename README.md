@@ -6,6 +6,8 @@ This repo contains the necessary components for running Windows games in [Univer
 
 To setup the GTA V environment, follow the [readme here](vnc-gtav/README.md).
 
+** 1.0.944.2 files mirrored at: https://cmu.box.com/shared/static/83mo54mdo6fznenyycw7nhwkx8hn30cs.zip
+
 ## Development
 This repo contains a Visual Studio solution for hosting Universe environments in Windows. Unlike the other Universe environments, Windows does not run dockerized, so the environment runs natively. 
 
